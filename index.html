@@ -27,51 +27,71 @@
             <div class="stat-item" id="timer-container">Time: <span id="timer-display">--</span></div>
           </div>
 
-          <div id="start-screen" class="screen active">
-            <h1 class="title">VIBETYPE</h1>
-            <p class="subtitle">Defend the line.</p>
-            
-            <div class="mode-select">
-              <button class="mode-btn selected" data-mode="survival">SURVIVAL</button>
-              <button class="mode-btn" data-mode="time-15">15s BLITZ</button>
-              <button class="mode-btn" data-mode="time-30">30s BLITZ</button>
+          <div id="start-screen" class="screen active split-layout">
+            <div class="content-left">
+              <h1 class="title">VIBETYPE</h1>
+              <p class="subtitle">Defend the line.</p>
+              
+              <div class="mode-select">
+                <button class="mode-btn selected" data-mode="survival">SURVIVAL</button>
+                <button class="mode-btn" data-mode="time-15">15s BLITZ</button>
+                <button class="mode-btn" data-mode="time-30">30s BLITZ</button>
+              </div>
+
+              <div class="button-container">
+                <button id="start-btn">PLAY</button>
+              </div>
             </div>
 
-            <div id="leaderboard">
-              <h3>LEADERBOARD - <span id="leaderboard-mode">SURVIVAL</span></h3>
-              <ul id="leaderboard-list">
-                <!-- Scores will be injected here -->
-              </ul>
+            <div class="content-right">
+              <div id="leaderboard">
+                <h3>LEADERBOARD - <span id="leaderboard-mode">SURVIVAL</span> <button id="reset-leaderboard-btn" class="sm-btn">RESET</button></h3>
+                <ul id="leaderboard-list">
+                  <!-- Scores will be injected here -->
+                </ul>
+              </div>
             </div>
-            
-            <button id="start-btn">PLAY</button>
           </div>
           
-          <div id="game-over-screen" class="screen hidden">
-            <h1 class="title text-red">GAME OVER</h1>
-            <div class="stats-grid">
-              <div class="stat-box">
-                <div class="label">Score</div>
-                <div class="value" id="final-score">0</div>
+          <div id="game-over-screen" class="screen hidden split-layout">
+            <div class="content-left">
+              <h1 class="title text-red">GAME OVER</h1>
+              
+              <input type="text" id="player-name-input" placeholder="ENTER NAME" maxlength="12" autocomplete="off">
+
+              <div class="stats-grid">
+                <div class="stat-box">
+                  <div class="label">Score</div>
+                  <div class="value" id="final-score">0</div>
+                </div>
+                <div class="stat-box">
+                  <div class="label">WPM</div>
+                  <div class="value" id="final-wpm">0</div>
+                </div>
+                <div class="stat-box">
+                  <div class="label">Accuracy</div>
+                  <div class="value" id="final-acc">0%</div>
+                </div>
               </div>
-              <div class="stat-box">
-                <div class="label">WPM</div>
-                <div class="value" id="final-wpm">0</div>
+              
+              <div id="rank-container" class="hidden">
+                 <div class="rank-info">RANK: <span id="final-rank">#--</span></div>
+                 <div class="percentile-info">Better than <span id="final-percentile">--%</span> of players</div>
               </div>
-              <div class="stat-box">
-                <div class="label">Accuracy</div>
-                <div class="value" id="final-acc">0%</div>
+
+              <div class="button-group">
+                <button id="restart-btn">RETRY</button>
+                <button id="menu-btn">MENU</button>
               </div>
-            </div>
-            
-            <div id="rank-container" class="hidden">
-               <div class="rank-info">RANK: <span id="final-rank">#--</span></div>
-               <div class="percentile-info">Better than <span id="final-percentile">--%</span> of players</div>
             </div>
 
-            <div class="button-group">
-              <button id="restart-btn">RETRY</button>
-              <button id="menu-btn">MENU</button>
+            <div class="content-right">
+               <div id="game-over-leaderboard" class="leaderboard-panel">
+                <h3>LEADERBOARD</h3>
+                <ul id="game-over-leaderboard-list">
+                  <!-- Scores will be injected here -->
+                </ul>
+              </div>
             </div>
           </div>
           

@@ -76,9 +76,15 @@ const subtitle = document.querySelector('.subtitle');
 const leaderboard = document.getElementById('leaderboard');
 const leaderboardList = document.getElementById('leaderboard-list');
 const leaderboardMode = document.getElementById('leaderboard-mode');
+const gameoverLeaderboardList = document.getElementById('game-over-leaderboard-list'); // Added
 const rankContainer = document.getElementById('rank-container');
 const finalRank = document.getElementById('final-rank');
 const finalPercentile = document.getElementById('final-percentile');
+const playerNameInput = document.getElementById('player-name-input');
+const resetLeaderboardBtn = document.getElementById('reset-leaderboard-btn');
+const gameOverLeaderboard = document.getElementById('game-over-leaderboard');
+const gameOverLeaderboardList = document.getElementById('game-over-leaderboard-list');
+const saveScoreContainer = document.getElementById('save-score-container');
 
 const QUOTES = [
     "Type fast, live young.",
@@ -117,7 +123,7 @@ const ScoreManager = {
         }
     },
 
-    saveScore(mode, score, wpm, accuracy) {
+    saveScore(mode, score, wpm, accuracy, name) {
         const data = localStorage.getItem(SCORE_KEY);
         let parsed = {};
         try {
@@ -134,6 +140,7 @@ const ScoreManager = {
             score,
             wpm,
             accuracy: parseInt(accuracy), // Remove % if passed as string
+            name: name || "ANONYMOUS",
             date: Date.now()
         };
         
@@ -154,6 +161,21 @@ const ScoreManager = {
         }
         
         return this.getRankAndPercentile(mode, newEntry.id);
+    },
+
+    resetScores(mode) {
+        const data = localStorage.getItem(SCORE_KEY);
+        if (!data) return;
+        try {
+            const parsed = JSON.parse(data);
+            if (parsed[mode]) {
+                parsed[mode] = [];
+                localStorage.setItem(SCORE_KEY, JSON.stringify(parsed));
+                this.updateLeaderboardUI(mode);
+            }
+        } catch (e) {
+            console.error("Error resetting scores:", e);
+        }
     },
 
     getRankAndPercentile(mode, entryId) {
@@ -177,22 +199,49 @@ const ScoreManager = {
         return { rank, percentile };
     },
 
+    getHypotheticalRank(mode, score) {
+        const scores = this.getScores(mode);
+        let rank = 1;
+        for (let i = 0; i < scores.length; i++) {
+            if (score >= scores[i].score) {
+                break;
+            }
+            rank++;
+        }
+        
+        const below = scores.filter(s => s.score < score).length;
+        const total = scores.length + 1;
+        
+        let percentile = 0;
+        if (total > 1) {
+            percentile = Math.round((below / (total - 1)) * 100);
+        }
+        
+        return { rank, percentile };
+    },
+
     updateLeaderboardUI(mode) {
-        if (!leaderboard) return;
+        // Main Menu Leaderboard
+        this.renderLeaderboard(mode, leaderboardList);
+        // Game Over Leaderboard
+        this.renderLeaderboard(mode, gameoverLeaderboardList);
+    },
+    
+    renderLeaderboard(mode, listElement) {
+        if (!listElement) return;
+
+        const scores = this.getScores(mode); // Show all scores
         
-        const scores = this.getScores(mode).slice(0, 10);
-        leaderboardMode.textContent = mode === 'survival' ? 'SURVIVAL' : (mode === 'time-15' ? '15s BLITZ' : '30s BLITZ');
-        
-        leaderboardList.innerHTML = scores.map((s, i) => `
+        listElement.innerHTML = scores.map((s, i) => `
             <li>
                 <span class="rank">#${i + 1}</span>
-                <span class="sc-val">${s.score}</span>
+                <span class="sc-val">${s.score} <span style="font-size:0.7em; opacity:0.6;">${s.name}</span></span>
                 <span class="wpm-val">${s.wpm} WPM</span>
             </li>
         `).join('');
         
         if (scores.length === 0) {
-            leaderboardList.innerHTML = `<li style="justify-content:center; color:#555;">No scores yet</li>`;
+            listElement.innerHTML = `<li style="justify-content:center; color:#555;">No scores yet</li>`;
         }
     }
 };
@@ -241,8 +290,31 @@ modeBtns.forEach(btn => {
 
 // Event Listeners
 startBtn.addEventListener('click', prepGame);
-restartBtn.addEventListener('click', prepGame);
-menuBtn.addEventListener('click', showMenu);
+
+restartBtn.addEventListener('click', () => {
+    commitScore();
+    prepGame();
+});
+
+menuBtn.addEventListener('click', () => {
+    commitScore();
+    showMenu();
+});
+
+resetLeaderboardBtn.addEventListener('click', () => {
+    if (confirm("Are you sure you want to reset the leaderboard for this mode?")) {
+        ScoreManager.resetScores(gameMode);
+    }
+});
+
+playerNameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        if (pendingStats) {
+             commitScore();
+             // Do NOT prepGame() here. Stay on screen.
+        }
+    }
+});
 
 function showMenu() {
     isPlaying = false;
@@ -436,27 +508,51 @@ function createStaticWord(text, x, y, width, height) {
     words.push({ id, text, x, y, width, height, speed: 0, element }); // Speed 0 for static
 }
 
+let pendingStats = null;
+
 function gameOver() {
     isPlaying = false;
     cancelAnimationFrame(animationFrameId);
 
     const stats = calculateStats();
-
-    // Save Score & Get Rank
-    const result = ScoreManager.saveScore(gameMode, score, stats.wpm, stats.accuracy);
     
-    // Update Rank UI
-    rankContainer.classList.remove('hidden');
-    finalRank.textContent = `#${result.rank}`;
-    finalPercentile.textContent = `${result.percentile}%`;
+    // Store stats for saving later
+    pendingStats = {
+        score: score,
+        wpm: stats.wpm,
+        accuracy: stats.accuracy
+    };
 
+    // Show Rank based on hypothetical save
+    const hyp = ScoreManager.getHypotheticalRank(gameMode, score);
+    
+    rankContainer.classList.remove('hidden');
+    finalRank.textContent = `#${hyp.rank}`;
+    finalPercentile.textContent = `${hyp.percentile}%`;
+    
     finalScoreDisplay.textContent = score;
     finalWpmDisplay.textContent = stats.wpm;
     finalAccDisplay.textContent = stats.accuracy + '%';
 
+    playerNameInput.value = ''; // Clear input
+    playerNameInput.focus();
+
     gameOverScreen.classList.remove('hidden');
     hud.classList.add('hidden');
     liveStats.classList.add('hidden');
+}
+
+function commitScore() {
+    if (!pendingStats) return;
+    
+    // Default name validation
+    let name = playerNameInput.value.trim();
+    if (!name) name = "ANONYMOUS";
+    
+    ScoreManager.saveScore(gameMode, pendingStats.score, pendingStats.wpm, pendingStats.accuracy, name);
+    ScoreManager.updateLeaderboardUI(gameMode); // Update UI with new score
+    
+    pendingStats = null; // Clear
 }
 
 function calculateStats() {

@@ -148,36 +148,69 @@ body {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  /* background-color: rgba(10, 10, 10, 0.8); */
-  /* backdrop-filter: blur(5px); */
+  /* Default directon is column for centering, but split-layout overrides */
+  flex-direction: column; 
+  /* justify-content: center; */ /* Removed global centering to allow split layout control */
+  color: var(--text-color);
+  /* align-items: center; */ /* Removed global centering */
   pointer-events: auto;
   transition: opacity 0.3s ease;
+}
+
+.screen.split-layout {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4rem 6rem; /* Add generous padding */
+}
+
+.content-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; /* Left align everything */
+  text-align: left;
+  height: 100%;
+  max-width: 60%;
+}
+
+.content-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center the leaderboard content if needed, OR stretch */
+  align-items: stretch; /* Stretch the leaderboard to full width of this col */
+  height: 100%;
+  max-width: 40%;
+  min-width: 400px;
 }
 
 #start-screen {
   /* Make menu transparent so canvas is visible */
   background: radial-gradient(circle, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.8) 100%);
+  align-items: stretch; /* Allow children to stretch to full height */
 }
 
 #game-over-screen {
-  background-color: rgba(10, 10, 10, 0.9);
-  backdrop-filter: blur(5px);
+  background-color: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
+  align-items: stretch;
 }
 
 .screen.hidden {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden; /* Ensure it doesn't block clicks */
 }
 
 .title {
-  font-size: 5rem;
+  font-size: 6rem; /* Slightly larger for impact */
   font-weight: 700;
-  letter-spacing: 0.2em;
-  margin-bottom: 1rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+  line-height: 1;
 }
 
 .text-red {
@@ -186,9 +219,10 @@ body {
 }
 
 .subtitle {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin-bottom: 3rem;
   opacity: 0.8;
+  font-weight: 300;
 }
 
 button {
@@ -213,8 +247,102 @@ button:hover {
 .button-group {
   display: flex;
   gap: 20px;
-  justify-content: center;
+  justify-content: flex-start; /* Left align buttons */
+  margin-top: 1rem;
 }
+
+.button-container {
+  margin-top: 2rem;
+}
+
+/* Specific button styles */
+#start-btn {
+  font-size: 2rem;
+  padding: 1.2rem 4rem;
+  border-width: 3px;
+}
+
+/* Leaderboard Styles */
+#leaderboard, .leaderboard-panel {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  height: 100%; /* Fill the container */
+  max-height: none; /* Remove limit */
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(5px);
+}
+
+#leaderboard h3, .leaderboard-panel h3 {
+  font-family: var(--font-code);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#leaderboard-list, #game-over-leaderboard-list {
+  list-style: none;
+  overflow-y: auto; /* Scroll enabled */
+  flex: 1;
+  padding-right: 10px; /* Space for scrollbar */
+}
+
+/* Custom Scrollbar */
+#leaderboard-list::-webkit-scrollbar, 
+#game-over-leaderboard-list::-webkit-scrollbar {
+  width: 6px;
+}
+#leaderboard-list::-webkit-scrollbar-track,
+#game-over-leaderboard-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+#leaderboard-list::-webkit-scrollbar-thumb,
+#game-over-leaderboard-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+#leaderboard-list::-webkit-scrollbar-thumb:hover,
+#game-over-leaderboard-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+#leaderboard-list li, #game-over-leaderboard-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+}
+
+#leaderboard-list li span:first-child,
+#game-over-leaderboard-list li span:first-child {
+  opacity: 0.7;
+  width: 40px; /* specific width for rank */
+  color: var(--accent-green);
+}
+
+#leaderboard-list li .sc-val,
+#game-over-leaderboard-list li .sc-val {
+  color: #fff;
+  font-weight: bold;
+  flex: 1;
+  text-align: center;
+}
+
+#leaderboard-list li .wpm-val,
+#game-over-leaderboard-list li .wpm-val {
+  width: 80px;
+  text-align: right;
+  opacity: 0.8;
+  font-size: 0.8em;
+}
+
 
 #hud {
   position: absolute;
@@ -293,60 +421,7 @@ button:hover {
   display: none !important;
 }
 
-/* Leaderboard */
-#leaderboard {
-  margin: 20px auto;
-  width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-#leaderboard h3 {
-  font-size: 1rem;
-  color: var(--accent-blue);
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 5px;
-  text-align: center;
-}
-
-#leaderboard-list {
-  list-style: none;
-  padding: 0;
-}
-
-#leaderboard-list li {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 10px;
-  font-family: var(--font-code);
-  font-size: 0.9rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-#leaderboard-list li:last-child {
-  border-bottom: none;
-}
-
-#leaderboard-list li .rank {
-  color: var(--accent-green);
-  width: 30px;
-  text-align: left;
-}
-
-#leaderboard-list li .sc-val {
-  font-weight: bold;
-  color: #fff;
-  flex: 1;
-  text-align: center;
-}
+/* ...merged above... */
 
 #leaderboard-list li .wpm-val {
   color: #888;
@@ -377,3 +452,46 @@ button:hover {
   color: #aaa;
 }
 
+/* Player Name Input */
+#player-name-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--accent-green);
+  color: var(--text-color);
+  font-family: var(--font-code);
+  font-size: 1.5rem;
+  width: 250px;
+  text-align: center;
+  padding: 10px;
+  margin-bottom: 20px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+#player-name-input:focus {
+  border-bottom-color: var(--accent-blue);
+}
+
+#player-name-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* Reset Button in Leaderboard */
+#reset-leaderboard-btn {
+  background: transparent;
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  margin-left: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+#reset-leaderboard-btn:hover {
+  background: var(--accent-red);
+  color: var(--bg-color);
+}
