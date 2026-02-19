@@ -72,6 +72,14 @@ const countdownOverlay = document.getElementById('countdown-overlay');
 const menuBtn = document.getElementById('menu-btn');
 const subtitle = document.querySelector('.subtitle');
 
+// Leaderboard Elements
+const leaderboard = document.getElementById('leaderboard');
+const leaderboardList = document.getElementById('leaderboard-list');
+const leaderboardMode = document.getElementById('leaderboard-mode');
+const rankContainer = document.getElementById('rank-container');
+const finalRank = document.getElementById('final-rank');
+const finalPercentile = document.getElementById('final-percentile');
+
 const QUOTES = [
     "Type fast, live young.",
     "Words are your weapon.",
@@ -94,6 +102,116 @@ function setRandomQuote() {
 // Initial Quote
 setRandomQuote();
 
+const SCORE_KEY = 'vibetype_scores_v1';
+
+const ScoreManager = {
+    getScores(mode) {
+        const data = localStorage.getItem(SCORE_KEY);
+        if (!data) return [];
+        try {
+            const parsed = JSON.parse(data);
+            return parsed[mode] || [];
+        } catch (e) {
+            console.error("Error parsing scores:", e);
+            return [];
+        }
+    },
+
+    saveScore(mode, score, wpm, accuracy) {
+        const data = localStorage.getItem(SCORE_KEY);
+        let parsed = {};
+        try {
+            parsed = data ? JSON.parse(data) : {};
+        } catch (e) {
+            console.error("Error parsing scores for save, resetting:", e);
+            parsed = {};
+        }
+        
+        if (!parsed[mode]) parsed[mode] = [];
+        
+        const newEntry = {
+            id: Date.now() + Math.random(), // Unique ID for finding exact rank
+            score,
+            wpm,
+            accuracy: parseInt(accuracy), // Remove % if passed as string
+            date: Date.now()
+        };
+        
+        parsed[mode].push(newEntry);
+        
+        // Sort descending by score
+        parsed[mode].sort((a, b) => b.score - a.score);
+        
+        // Keep top 100 locally
+        if (parsed[mode].length > 100) {
+            parsed[mode] = parsed[mode].slice(0, 100);
+        }
+        
+        try {
+            localStorage.setItem(SCORE_KEY, JSON.stringify(parsed));
+        } catch (e) {
+            console.error("Failed to save score to localStorage:", e);
+        }
+        
+        return this.getRankAndPercentile(mode, newEntry.id);
+    },
+
+    getRankAndPercentile(mode, entryId) {
+        const scores = this.getScores(mode);
+        // Scores are sorted desc by default from getScores() logic? No, getScores just returns the array.
+        // Wait, saveScore sorts it before saving. So the array in localStorage is sorted.
+        // But getScores() returns `parsed[mode]`.
+        
+        // Find by ID to get exact rank of THIS attempt
+        const rank = scores.findIndex(s => s.id === entryId) + 1;
+        const currentScore = scores.find(s => s.id === entryId)?.score || 0;
+        
+        const below = scores.filter(s => s.score < currentScore).length;
+        const total = scores.length;
+
+        let percentile = 100;
+        if (total > 1) {
+            percentile = Math.round((below / (total - 1)) * 100);
+        }
+        
+        return { rank, percentile };
+    },
+
+    updateLeaderboardUI(mode) {
+        if (!leaderboard) return;
+        
+        const scores = this.getScores(mode).slice(0, 10);
+        leaderboardMode.textContent = mode === 'survival' ? 'SURVIVAL' : (mode === 'time-15' ? '15s BLITZ' : '30s BLITZ');
+        
+        leaderboardList.innerHTML = scores.map((s, i) => `
+            <li>
+                <span class="rank">#${i + 1}</span>
+                <span class="sc-val">${s.score}</span>
+                <span class="wpm-val">${s.wpm} WPM</span>
+            </li>
+        `).join('');
+        
+        if (scores.length === 0) {
+            leaderboardList.innerHTML = `<li style="justify-content:center; color:#555;">No scores yet</li>`;
+        }
+    }
+};
+
+// Initialize Leaderboard
+const savedMode = localStorage.getItem('vibetype_last_mode');
+if (savedMode && ['survival', 'time-15', 'time-30'].includes(savedMode)) {
+    gameMode = savedMode;
+    // Update UI buttons
+    modeBtns.forEach(btn => {
+        if (btn.dataset.mode === gameMode) {
+            btn.classList.add('selected');
+        } else {
+            btn.classList.remove('selected');
+        }
+    });
+}
+ScoreManager.updateLeaderboardUI(gameMode);
+
 // Dimensions
 let gameWidth = window.innerWidth;
 let gameHeight = window.innerHeight;
@@ -112,6 +230,12 @@ modeBtns.forEach(btn => {
         modeBtns.forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         gameMode = btn.dataset.mode;
+        
+        // Save choice
+        localStorage.setItem('vibetype_last_mode', gameMode);
+        
+        // Update leaderboard when mode changes
+        ScoreManager.updateLeaderboardUI(gameMode);
     });
 });
 
@@ -127,12 +251,15 @@ function showMenu() {
     // UI Cleanup
     gameOverScreen.classList.add('hidden');
     startScreen.classList.remove('hidden');
-    hud.classList.add('hidden');
-    liveStats.classList.add('hidden');
+    leaderboard.classList.remove('hidden'); // Show leaderboard
+    
     wordContainer.innerHTML = '';
     inputBuffer = "";
     updateInputDisplay();
     
+    // Refresh Leaderboard
+    ScoreManager.updateLeaderboardUI(gameMode);
+
     // Reset Background
     meteorShower.mode = 'menu';
     setRandomQuote();
@@ -141,6 +268,9 @@ function showMenu() {
 function prepGame() {
     console.log("Game Started: " + gameMode);
     
+    // Background Mode
+    meteorShower.mode = 'game';
+    leaderboard.classList.add('hidden'); // Hide leaderboard
     // Background Mode
     meteorShower.mode = 'game';
 
@@ -311,6 +441,14 @@ function gameOver() {
     cancelAnimationFrame(animationFrameId);
 
     const stats = calculateStats();
+
+    // Save Score & Get Rank
+    const result = ScoreManager.saveScore(gameMode, score, stats.wpm, stats.accuracy);
+    
+    // Update Rank UI
+    rankContainer.classList.remove('hidden');
+    finalRank.textContent = `#${result.rank}`;
+    finalPercentile.textContent = `${result.percentile}%`;
 
     finalScoreDisplay.textContent = score;
     finalWpmDisplay.textContent = stats.wpm;

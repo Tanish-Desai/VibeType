@@ -292,3 +292,88 @@ button:hover {
 .hidden {
   display: none !important;
 }
+
+/* Leaderboard */
+#leaderboard {
+  margin: 20px auto;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+#leaderboard h3 {
+  font-size: 1rem;
+  color: var(--accent-blue);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+#leaderboard-list {
+  list-style: none;
+  padding: 0;
+}
+
+#leaderboard-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 10px;
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#leaderboard-list li:last-child {
+  border-bottom: none;
+}
+
+#leaderboard-list li .rank {
+  color: var(--accent-green);
+  width: 30px;
+  text-align: left;
+}
+
+#leaderboard-list li .sc-val {
+  font-weight: bold;
+  color: #fff;
+  flex: 1;
+  text-align: center;
+}
+
+#leaderboard-list li .wpm-val {
+  color: #888;
+  font-size: 0.8rem;
+  width: 60px;
+  text-align: right;
+}
+
+/* Rank Display in Game Over */
+#rank-container {
+  margin: 15px 0;
+  text-align: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+}
+
+.rank-info {
+  font-size: 1.2rem;
+  color: var(--accent-green);
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.percentile-info {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+

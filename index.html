@@ -36,6 +36,13 @@
               <button class="mode-btn" data-mode="time-15">15s BLITZ</button>
               <button class="mode-btn" data-mode="time-30">30s BLITZ</button>
             </div>
+
+            <div id="leaderboard">
+              <h3>LEADERBOARD - <span id="leaderboard-mode">SURVIVAL</span></h3>
+              <ul id="leaderboard-list">
+                <!-- Scores will be injected here -->
+              </ul>
+            </div>
             
             <button id="start-btn">PLAY</button>
           </div>
@@ -56,6 +63,12 @@
                 <div class="value" id="final-acc">0%</div>
               </div>
             </div>
+            
+            <div id="rank-container" class="hidden">
+               <div class="rank-info">RANK: <span id="final-rank">#--</span></div>
+               <div class="percentile-info">Better than <span id="final-percentile">--%</span> of players</div>
+            </div>
+
             <div class="button-group">
               <button id="restart-btn">RETRY</button>
               <button id="menu-btn">MENU</button>
