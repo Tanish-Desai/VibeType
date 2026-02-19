@@ -27,7 +27,15 @@ function getDifficulty(currentScore) {
         if (currentScore >= t.score) tier = t;
         else break;
     }
-    return tier;
+    
+    // Apply calibration settings
+    // velocityMult scales the speed of words
+    // accelMult scales the spawn rate (higher acceleration = faster spawns)
+    return {
+        ...tier,
+        speed: tier.speed * velocityMult,
+        spawnRate: tier.spawnRate / accelMult
+    };
 }
 
 // State
@@ -85,6 +93,37 @@ const resetLeaderboardBtn = document.getElementById('reset-leaderboard-btn');
 const gameOverLeaderboard = document.getElementById('game-over-leaderboard');
 const gameOverLeaderboardList = document.getElementById('game-over-leaderboard-list');
 const saveScoreContainer = document.getElementById('save-score-container');
+
+// Settings Elements
+const velocitySlider = document.getElementById('velocity-slider');
+const accelSlider = document.getElementById('accel-slider');
+const velocityVal = document.getElementById('velocity-val');
+const accelVal = document.getElementById('accel-val');
+
+// Settings State
+let velocityMult = 1.0;
+let accelMult = 1.0;
+
+// Initialize from DOM state
+if (velocitySlider) {
+    velocityMult = parseFloat(velocitySlider.value);
+    document.getElementById('velocity-val').textContent = velocityMult.toFixed(1);
+}
+if (accelSlider) {
+    accelMult = parseFloat(accelSlider.value);
+    document.getElementById('accel-val').textContent = accelMult.toFixed(1);
+}
+
+// Settings Listeners
+velocitySlider.addEventListener('input', (e) => {
+    velocityMult = parseFloat(e.target.value);
+    velocityVal.textContent = velocityMult.toFixed(1);
+});
+
+accelSlider.addEventListener('input', (e) => {
+    accelMult = parseFloat(e.target.value);
+    accelVal.textContent = accelMult.toFixed(1);
+});
 
 const QUOTES = [
     "Type fast, live young.",

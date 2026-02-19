@@ -298,6 +298,50 @@ button:hover {
 #game-over-leaderboard-list::-webkit-scrollbar {
   width: 6px;
 }
+
+/* Settings Panel */
+#settings-panel {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(5px);
+  padding: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 4px;
+}
+
+#settings-panel label {
+  min-width: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+#settings-panel input[type="range"] {
+  width: 150px;
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+}
+
+#settings-panel span {
+  min-width: 40px;
+  text-align: right;
+  color: var(--accent-green);
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: var(--text-color);
+  font-family: var(--font-code);
+  font-size: 0.9rem;
+}
+
 #leaderboard-list::-webkit-scrollbar-track,
 #game-over-leaderboard-list::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
