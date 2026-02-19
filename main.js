@@ -1,4 +1,4 @@
-import { wordList } from './wordList.js';
+import { wordList } from './sherlockList.js';
 import { MeteorShower } from './background.js';
 
 console.log("VibeType loaded");
