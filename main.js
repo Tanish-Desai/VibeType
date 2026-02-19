@@ -11,14 +11,14 @@ meteorShower.animate();
 // Game Constants
 const FORBIDDEN_LINE_PERCENT = 20;
 const DIFFICULTY_CHECKPOINTS = [
-    { score: 0, spawnRate: 1500, speed: 0.5 },
-    { score: 50, spawnRate: 1400, speed: 0.6 },
-    { score: 100, spawnRate: 1300, speed: 0.7 },
-    { score: 200, spawnRate: 1200, speed: 0.8 },
-    { score: 350, spawnRate: 1100, speed: 1.0 },
-    { score: 500, spawnRate: 1000, speed: 1.2 },
-    { score: 750, spawnRate: 900, speed: 1.4 },
-    { score: 1000, spawnRate: 800, speed: 1.6 }
+    { score: 0, spawnRate: 1500, speed: 1.4 },
+    { score: 50, spawnRate: 1400, speed: 1.7 },
+    { score: 100, spawnRate: 1300, speed: 1.9 },
+    { score: 200, spawnRate: 1200, speed: 2.2 },
+    { score: 350, spawnRate: 1100, speed: 2.8 },
+    { score: 500, spawnRate: 1000, speed: 3.3 },
+    { score: 750, spawnRate: 900, speed: 3.9 },
+    { score: 1000, spawnRate: 800, speed: 4.4 }
 ];
 
 function getDifficulty(currentScore) {
